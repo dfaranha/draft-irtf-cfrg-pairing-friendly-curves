@@ -99,7 +99,7 @@ informative:
 
 --- abstract
 
-Pairing-based cryptography, a subfield of elliptic curve cryptography, has received attention due to its flexible and practical functionality. Pairings are special maps defined using elliptic curves and it can be applied to construct several cryptographic protocols such as identity-based encryption, attribute-based encryption, and so on. This memo defines a set of chosen curves at 128 and 256 bit security levels and describes the algorithms required to compute with them.
+Pairing-based cryptography, a subfield of elliptic curve cryptography, has received attention due to its flexible and practical functionality. Pairings are special maps defined using elliptic curves and can be applied to construct several cryptographic protocols such as identity-based encryption, attribute-based encryption, and so on. This memo defines a set of chosen curves at 128, 192 and 256 bit security levels and describes the algorithms required to compute with them.
 
 --- middle
 
@@ -164,7 +164,7 @@ Let k be the minimum integer for which r is a divisor of `p^k - 1`; this is call
 Let `G_1` be a cyclic subgroup of `E(GF(p))` of order r, there also exists a cyclic subgroup of `E(GF(p^k))` of order `r`, define this to be `G_2`.
 Let `d` be a divisor of `k` and `E'` be an elliptic curve defined over `GF(p^(k/d))`.
 If an isomorphism from `E'` to `E(GF(p^k))` exists, then `E'` is called the twist of `E`.
-It can sometimes be convenient for efficiency to do the computations of `G_2` in the twist `E'`, and so consider `G_2` to instead be a subgroup of `E'`.
+It can be convenient for efficiency to do the computations of `G_2` in the twist `E'`, and so consider `G_2` to instead be a subgroup of `E'`.
 Let `G_T` be an order `r` subgroup of the multiplicative group `(GF(p^k))^*`; this exists by definition of `k`.
 
 A pairing is defined as a bilinear map `e`: `(G_1, G_2)` -> `G_T` satisfying the following properties:
@@ -175,7 +175,7 @@ A pairing is defined as a bilinear map `e`: `(G_1, G_2)` -> `G_T` satisfying the
 
 In applications, it is also necessary that for any `S` in `G_1` and `T` in `G_2`, this bilinear map is efficiently computable.
 
-We define some of the terminology used in this memo as follows:
+We define some terminology used in this memo as follows:
 
 * `GF(p)`: a finite field with characteristic `p`.
 * `GF(p^k)`: an extension field of degree `k`.
@@ -208,7 +208,7 @@ for an integer `t`.
 
 The elliptic curve `E` has an equation of the form `E`: `y^2 = x^3 + b`, where `b` is a primitive element of the multiplicative group `(GF(p))^*` of order `(p - 1)`.
 
-In the case of BN curves, we can use twists of the degree 6.
+In the case of BN curves, we can use twists of degree 6, which is the maximum degree possible for elliptic curves.
 If m is an element that is neither a square nor a cube in an extension field `GF(p^2)`, the twist `E'` of `E` is defined over an extension field `GF(p^2)` by the equation `E'`: `y^2 = x^3 + b'` with `b' = b / m` or `b'` = `b * m`.
 BN curves are called `D`-type if `b'` = `b / m`, and `M`-type if `b'` = `b * m`. The embedding degree `k` is 12.
 
@@ -226,7 +226,7 @@ In contrast to BN curves, `E(GF(p))` does not have a prime order.
 Instead, its order is divisible by a large parameterized prime `r` and denoted by `h * r` with cofactor `h`.
 The pairing is defined on the `r`-torsion points. In the same way as BN curves, BLS curves can be categorized as `D`-type and `M`-type.
 
-BLS curves vary in accordance with different embedding degrees. In this memo, we deal with the BLS12 and BLS48 families with embedding degrees 12 and 48 with respect to `r`, respectively.
+BLS curves vary in accordance with different embedding degrees. In this memo, we deal with the BLS12, BLS24 and BLS48 families with embedding degrees 12 and 48 with respect to `r`, respectively.
 
 In BLS curves, parameters `p` and `r` are given by the following equations:
 
@@ -234,6 +234,9 @@ In BLS curves, parameters `p` and `r` are given by the following equations:
    BLS12:
        p = (t - 1)^2 * (t^4 - t^2 + 1) / 3 + t
        r = t^4 - t^2 + 1
+   BLS24:
+       p = (t - 1)^2 * (t^8 - t^4 + 1) / 3 + t
+       r = t^8 - t^4 + 1
    BLS48:
        p = (t - 1)^2 * (t^16 - t^8 + 1) / 3 + t
        r = t^16 - t^8 + 1
@@ -241,7 +244,7 @@ In BLS curves, parameters `p` and `r` are given by the following equations:
 
 for a well chosen integer `t` where `t` must be 1 `(mod 3)`.
 
-A pairing `e` is defined by taking `G_1` as a subgroup of `E(GF(p))` of order `r`, `G_2` as an order `r` subgroup of `E'(GF(p^2))` for BLS12 and of `E'(GF(p^8))` for BLS48, and `G_T` as an order `r` subgroup of a multiplicative group `(GF(p^12))^*` for BLS12 and of a multiplicative group `(GF(p^48))^*` for BLS48.
+A pairing `e` is defined by taking `G_1` as a subgroup of `E(GF(p))` of order `r`, `G_2` as an order `r` subgroup of `E'(GF(p^2))` for BLS12, of `E'(GF(p^4))` for BLS24, and of `E'(GF(p^8))` for BLS48; and `G_T` as an order `r` subgroup of a multiplicative group `(GF(p^12))^*` for BLS12, a multiplicative group `(GF(p^24))^*` for BLS24, and of a multiplicative group `(GF(p^48))^*` for BLS48.
 
 ## Representation Convention for an Extension Field {#RepConv}
 
@@ -294,16 +297,17 @@ For instance, Barbulescu and Duquesne estimated that the security of the widely 
 
 # Selection of Pairing-Friendly Curves {#selection_pfc}
 
-We recommend the BLS curve with 381-bit characteristic of embedding degree 12 and the BN curve with the 462-bit characteristic for the 128-bit security level, and the BLS curves of embedding degree 48 with the 581-bit characteristic for the 256-bit security level. These curves are implemented widely and secure to known attacks.
+We recommend the BLS curve with 381-bit characteristic of embedding degree 12 and the BN curve with the 462-bit characteristic for the 128-bit security level, the BLS curves of embedding degree 24 with the 509-bit characteristic for the 192-bit security level, and the BLS curves of embedding degree 48 with the 581-bit characteristic for the 256-bit security level. These curves are implemented widely and secure to known attacks.
 
 ## For 128-bit Security
+
+TODO: replace BN462 with BN446
 
 BLS12_381 and BN462 match our selection policy aspect of pairing-friendly curves for 128-bit security.
 Especially, the one that best matches the policy is BLS12_381 from the viewpoint of "widely used" and "efficiency", so we introduce the parameters of BLS12_381 in this memo.
 
 On the other hand, from the viewpoint of the future use, the parameter of BN462 is also introduced.
-As shown in recent security evaluations for BLS12_381 {{!BD18=DOI.10.1007/s00145-018-9280-5}} {{!GMT19=DOI.10.1007/s10623-020-00727-w}}, its security level close to 128-bit but it is less than 128-bit.
-If the attack is improved even a little, BLS12_381 will not be suitable for the curve of the 128-bit security level.
+As shown in recent security evaluations for BLS12_381 {{BD18}} {{!GMT19=DOI.10.1007/s10623-020-00727-w}}, its security level close but a few bits lower than 128 bits.
 As curves of 128-bit security level are currently the most widely used, we recommend both BLS12_381 and BN462 in this memo in order to have a more efficient and a more prudent option respectively.
 
 ### BLS Curves for the 128-bit security level (BLS12_381) {#BLS12_381}
@@ -391,7 +395,7 @@ The size of `p` becomes 462-bit length. BN462 is categorized as D-type.
 We have to note that BN462 is significantly slower than BLS12_381, but has 134-bit security level {{GMT19}}, so may be more resistant to future small improvements to the exTNFS attack.
 
 We note also that CP8_544 is about 20% faster that BN462 {{GMT19}}, has 131-bit security level, and that due to its construction will not be affected by future small improvements to the exTNFS attack.
-However, as this curve is not widely used (it is only implemented in one library), we instead chose BN462 for our 'safe' option.
+However, as this curve is not widely used, we instead chose BN462 for our 'safe' option.
 
 We give the following parameters for BN462.
 
@@ -415,6 +419,32 @@ We give the following parameters for BN462.
 * `y'_1`: `0x073ef0cbd438cbe0172c8ae37306324d44d5e6b0c69ac57b393f1ab370fd725cc647692444a04ef87387aa68d53743493b9eba14cc552ca2a93a`
 * `h'`: `0x240480360120023ffffffffff6ff0cf6b7d9bfca0000000000d812908fa1ce0227fffffffff6ff66fc63f5f7f4c0000000002401b008a0168019`
 * `b'`: `-u + 2`
+
+## For 192-bit Security
+
+Recent work has examined multiple candidates for 192-bit security. According to {{!AFG24=DOI.10.62056/angyl86bm}}, we select BLS24_509 as the most efficient curve across a number of performance metrics.
+
+The selected BLS24 curve is shown in {{!KIK17=DOI.10.1007/978-3-319-61204-1_4}} and it is defined by the parameter
+
+```
+    t = -1 + 2^11 - 2^28 - 2^51.
+```
+
+In this case, the size of `p` becomes 509-bit.
+
+For the finite field `GF(p)`, the towers of extension field `GF(p^2)`, `GF(p^4)`, `GF(p^8)`, and `GF(p^24)` are defined by indeterminates `u`, `v`, `w`, and `z` as follows:
+
+```
+    GF(p^2) = GF(p)[u] / (u^2 + 1)
+    GF(p^4) = GF(p^2)[v] / (v^2 - u - 1)
+    GF(p^8) = GF(p^4)[w] / (w^2 - v)
+    GF(p^24) = GF(p^8)[z] / (z^3 - w)
+```
+
+The elliptic curve `E` and its twist `E'` are represented by `E`: `y^2 = x^3 + 1` and `E': y^2 = x^3 + 1 / v`.
+BLS24_509 is categorized as D-type.
+
+We then give the parameters for BLS24_509 as follows. TODO: add test vectors
 
 
 ## For 256-bit Security
@@ -484,7 +514,7 @@ Implementers who will newly develop pairing-based cryptography applications **SH
 As of 2020, as far as we've investigated the top cryptographic conferences in the past, there are no fatal attacks that significantly reduce the security of pairing-friendly curves after exTNFS.
 
 BLS curves of embedding degree 12 typically require a characteristic `p` of 461 bits or larger to achieve the 128-bit security level {{BD18}}.
-Note that the security level of BLS12_381, which is adopted by a lot of libraries and applications, is slightly below 128 bits because a 381-bit characteristic is used {{BD18}} {{GMT19}}.
+Note that the security level of BLS12_381, which is adopted by a lot of libraries and applications, is slightly below 128 bits because a 381-bit characteristic is used for efficiency {{BD18}} {{GMT19}}.
 
 BN254 is used in most of the existing implementations as shown in Appendix D, however, BN curves that were estimated as the 128-bit security level before exTNFS including BN254 ensure no more than the 100-bit security level by the effect of exTNFS.
 
@@ -495,8 +525,8 @@ In applications such as key agreement protocols, users exchange the elements in 
 To check these elements are so-called sub-group secure {{?BCM15=DOI.10.1007/978-3-319-22174-8_14}}, implementors should validate if the elements have the correct order `r`.
 Specifically, for public keys `P` in `G_1` and `Q` in `G_2`, a receiver should calculate scalar multiplications `[r]P` and `[r]Q`, and check the results become points at infinity.
 
-The pairing-based protocols, such as the BLS signatures, use a scalar multiplication in `G_1`, `G_2` and an exponentiation in `G_3` with the secret key.
-In order to prevent the leakage of secret key due to side channel attacks, implementors should apply countermeasure techniques such as montgomery ladder {{?Montgomery=DOI.10.1090/S0025-5718-1987-0866113-7}} when they implement modules of a scalar multiplication and an exponentiation. Please refer {{Montgomery}} for the detailed algorithms of montgomery ladder.
+The pairing-based protocols, such as the BLS signatures, use a scalar multiplication in `G_1`, `G_2` and an exponentiation in `G_T` with the secret key.
+In order to prevent the leakage of secret key due to side channel attacks, implementors should apply countermeasure techniques such as Montgomery ladder {{?Montgomery=DOI.10.1090/S0025-5718-1987-0866113-7}} when they implement modules of a scalar multiplication and an exponentiation. Please refer {{Montgomery}} for the detailed algorithms of Montgomery ladder.
 
 When converting between an element in extension field and an octet string, implementors should check that the coefficient is within an appropriate range {{IEEE1363}}.
 If the coefficient is out of range, there is a possible that security vulnerabilities such as the signature forgery may occur.
